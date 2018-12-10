@@ -36,42 +36,57 @@ namespace Trace
 
             return QueuedTask.Run(() =>
             {
+                try
+                {
 
-                var map = MapView.Active.Map;
-                map.SetSelection(null);
-                var mhExists = map.GetLayersAsFlattenedList().OfType<FeatureLayer>().Any(m => m.Name == "Manholes");
-                var sewerExists = map.GetLayersAsFlattenedList().OfType<FeatureLayer>().Any(s => s.Name == "Sewer Lines");
-                if (mhExists == false && sewerExists == false)
-                {
-                    MessageBox.Show("Manholes & Sewers are missing from map.", "Message");
-                }
-                else if (mhExists == false && sewerExists)
-                {
-                    MessageBox.Show("Sewer Lines layer is present. \n\nManholes layer is missing from map.", "Message");
-                }
-                else if (mhExists && sewerExists == false)
-                {
-                    MessageBox.Show("Manholes layer is present. \n\nSewers layer is missing from map.", "Message");
-                }
-                else
-                {
-                    // Build the Dictionaries mow that it has been confirmed that the necessary layers are in map.
-                    TraceUtilities.BuildDictionariesAsync(arcDict, nodeDict);
+                    var map = MapView.Active.Map;
+                    map.SetSelection(null);
+                    var mhExists = map.GetLayersAsFlattenedList().OfType<FeatureLayer>().Any(m => m.Name == "Manholes");
+                    var sewerExists = map.GetLayersAsFlattenedList().OfType<FeatureLayer>().Any(s => s.Name == "Sewer Lines");
 
-                    //Make manholes the only selectabe layer in map.
-                    var layers = map.GetLayersAsFlattenedList().OfType<FeatureLayer>();
-                    foreach (var layer in layers)
+                    // Check for the SEWER LINES Layer and MANHOLES layers in the map.
+                    if (mhExists == false && sewerExists == false)
                     {
+                        MessageBox.Show("Manholes & Sewers are missing from map.", "Message");
+                    }
+                    else if (mhExists == false && sewerExists)
+                    {
+                        MessageBox.Show("Sewer Lines layer is present. \n\nManholes layer is missing from map.", "Message");
+                    }
+                    else if (mhExists && sewerExists == false)
+                    {
+                        MessageBox.Show("Manholes layer is present. \n\nSewers layer is missing from map.", "Message");
+                    }
+                    else
+                    {
+                        // Build the Dictionaries mow that it has been confirmed that the necessary layers are in map.
+                        TraceUtilities.BuildDictionariesAsync(arcDict, nodeDict);
 
-                        if (layer.Name == "Manholes")
+                        //Make manholes the only selectabe layer in map.
+                        var layers = map.GetLayersAsFlattenedList().OfType<FeatureLayer>();
+                        foreach (var layer in layers)
                         {
-                            layer.SetSelectable(true);
-                        }
-                        else
-                        {
-                            layer.SetSelectable(false);
+
+                            if (layer.Name == "Manholes")
+                            {
+                                layer.SetSelectable(true);
+                            }
+                            else
+                            {
+                                layer.SetSelectable(false);
+                            }
                         }
                     }
+                }
+
+                catch (Exception)
+                {
+                    string caption = "Failed to select manhole!";
+                    string message = "Process failed. \n\nSave and restart ArcGIS Pro and try process again.\n\n" +
+                        "If problem persist, contact your local GIS nerd.";
+
+                    //Using the ArcGIS Pro SDK MessageBox class
+                    MessageBox.Show(message, caption);
                 }
             });
         }
