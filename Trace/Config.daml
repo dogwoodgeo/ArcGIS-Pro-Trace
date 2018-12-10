@@ -11,7 +11,7 @@
                     Content, Framework, Editing, Geodatabase, Geometry, Geoprocessing, Layouts, Map Authoring, Map Exploration -->
   </AddInInfo>
   <modules>
-    <insertModule id="Trace_Module" className="Module1" autoLoad="false" caption="Module1">
+    <insertModule id="Trace_Module" className="TraceUtilities" autoLoad="false" caption="TraceUtilities">
       <!-- uncomment to have the control hosted on a separate tab-->
       <tabs>
         <!--<tab id="Trace_Tab1" caption="New Tab">
@@ -21,7 +21,7 @@
       <groups>
         <!-- comment this out if you have no controls on the Addin tab to avoid
               an empty group-->
-        <group id="Trace_Group1" caption="Trace" appearsOnAddInTab="true">
+        <group id="Trace_TraceUtilities" caption="Trace" appearsOnAddInTab="true">
           <!-- host controls within groups -->
           <tool refID="Trace_TraceUpstream" size="large" />
         </group>

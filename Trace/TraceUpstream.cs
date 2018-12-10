@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -21,6 +22,9 @@ namespace Trace
 {
     internal class TraceUpstream : MapTool
     {
+        Dictionary<int, List<string>> arcDict = new Dictionary<int, List<string>>();
+        Dictionary<string, List<int>> nodeDict = new Dictionary<string, List<int>>();
+
         public TraceUpstream()
         {
             IsSketchTool = true;
@@ -29,6 +33,7 @@ namespace Trace
         }
         protected override Task OnToolActivateAsync(bool active)
         {
+
             return QueuedTask.Run(() =>
             {
 
@@ -50,6 +55,10 @@ namespace Trace
                 }
                 else
                 {
+                    // Build the Dictionaries mow that it has been confirmed that the necessary layers are in map.
+                    TraceUtilities.BuildDictionariesAsync(arcDict, nodeDict);
+
+                    //Make manholes the only selectabe layer in map.
                     var layers = map.GetLayersAsFlattenedList().OfType<FeatureLayer>();
                     foreach (var layer in layers)
                     {
