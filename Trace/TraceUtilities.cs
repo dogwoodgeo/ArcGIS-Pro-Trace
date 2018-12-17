@@ -50,7 +50,7 @@ namespace Trace
         #endregion Overrides
 
 
-        public static void BuildDictionariesAsync(Dictionary<int, List<string>> arcDictionary, Dictionary<string, List<int>> nodeDictionary)
+        public static void BuildDictionariesAsync(Dictionary<int, List<string>> arcNodeListDictionary, Dictionary<string, List<int>> nodeArcListDictionary)
         {
             QueuedTask.Run(() =>
             {
@@ -83,41 +83,41 @@ namespace Trace
                             var nodeUpVal = row.GetOriginalValue(nodeUpIdx);
                             var nodeDownVal = row.GetOriginalValue(nodeDwnIdx);
 
-                            // Populate arcDict keys and values
-                            if (arcDictionary.ContainsKey((int)objIDVal))
+                            // Populate arcNodeListDictionary keys and values
+                            if (arcNodeListDictionary.ContainsKey((int)objIDVal))
                             {
                                 //Do nothing
                             }
                             else
                             {
-                                arcDictionary.Add((int)objIDVal, new List<string>());
-                                arcDictionary[(int)objIDVal].Add((string)nodeUpVal);
-                                arcDictionary[(int)objIDVal].Add((string)nodeDownVal);
+                                arcNodeListDictionary.Add((int)objIDVal, new List<string>());
+                                arcNodeListDictionary[(int)objIDVal].Add((string)nodeUpVal);
+                                arcNodeListDictionary[(int)objIDVal].Add((string)nodeDownVal);
                             }
 
-                            // Check of the nodeDict contains nodeUpVal as KEY- Add nodeUpVal if FALSE
-                            if (nodeDictionary.ContainsKey((string)nodeUpVal))
+                            // Check of the nodeArcListDictionary contains nodeUpVal as KEY- Add nodeUpVal if FALSE
+                            if (nodeArcListDictionary.ContainsKey((string)nodeUpVal))
                             {
 
-                                nodeDictionary[(string)nodeUpVal].Add((int)objIDVal);
+                                nodeArcListDictionary[(string)nodeUpVal].Add((int)objIDVal);
 
                             }
                             else
                             {
-                                nodeDictionary.Add((string)nodeUpVal, new List<int>());
-                                nodeDictionary[(string)nodeUpVal].Add((int)objIDVal);
+                                nodeArcListDictionary.Add((string)nodeUpVal, new List<int>());
+                                nodeArcListDictionary[(string)nodeUpVal].Add((int)objIDVal);
                             }
 
-                            // Check of the nodeDict contains nodeDownVal as KEY- Add nodeDownVal if FALSE
-                            if (nodeDictionary.ContainsKey((string)nodeDownVal))
+                            // Check of the nodeArcListDictionary contains nodeDownVal as KEY- Add nodeDownVal if FALSE
+                            if (nodeArcListDictionary.ContainsKey((string)nodeDownVal))
                             {
                                 //Do nothing
-                                nodeDictionary[(string)nodeDownVal].Add((int)objIDVal);
+                                nodeArcListDictionary[(string)nodeDownVal].Add((int)objIDVal);
                             }
                             else
                             {
-                                nodeDictionary.Add((string)nodeDownVal, new List<int>());
-                                nodeDictionary[(string)nodeDownVal].Add((int)objIDVal);
+                                nodeArcListDictionary.Add((string)nodeDownVal, new List<int>());
+                                nodeArcListDictionary[(string)nodeDownVal].Add((int)objIDVal);
                             }
                         }
                     }
