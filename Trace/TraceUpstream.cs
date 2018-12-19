@@ -22,6 +22,14 @@ namespace Trace
 {
     internal class TraceUpstream : MapTool
     {
+        // TDODO
+        // 1) Add progress dialog for long traces.
+        // 2) Handle condtions when more than 1 manhole is selected.
+        //
+
+
+
+
         // GLOBAL VARIABLES FOR DICTIONARIES
         // *********************************
         // arcNodeListDict: paired list of From (upstream) node and To (downstream) node for each arc.
@@ -32,7 +40,7 @@ namespace Trace
         // nodeArcListDict: Lists all arcs attached to the specified node.
         // manhole# --> {sewerlineObjID, sewerlineObjID, ...} -- can have more than 2 arcs.
         Dictionary<string, List<int>> nodeArcListDict = new Dictionary<string, List<int>>();
-        private readonly object value;
+        //private readonly object value;
 
         public TraceUpstream()
         {
@@ -86,6 +94,8 @@ namespace Trace
                             }
                         }
                     }
+
+
                 }
 
                 catch (Exception)
@@ -148,9 +158,9 @@ namespace Trace
                         foreach (var arcValue in arcValues)
                         {
                             workArcList.Add(arcValue);
-                            Debug.WriteLine("********************\n"+ arcValue);
+                            //Debug.WriteLine("********************\n"+ arcValue);
                         }
-                        Debug.WriteLine("*************************\n" + workArcList.Count);
+                        //Debug.WriteLine("*************************\n" + workArcList.Count);
 
                         // Create the removeArcsList to store the Arcs(VALUES as int)  
                         // 
@@ -159,35 +169,38 @@ namespace Trace
                         // loop through workArcList check if it contains upstream node = mhNum selected by user
                         foreach (var workArc in workArcList)
                         {
-                            Debug.WriteLine($"********************\nAttached arc: {workArc}" );
+                            //Debug.WriteLine($"********************\nAttached arc: {workArc}" );
 
                             // Get the list of Values from the arcNodeListDict for the current arc KEY (workArc) in workArcList.
                             arcNodeListDict.TryGetValue(workArc, out List<string> nodeWorkVals);
                             
                             //Get the upstream manhole [0] from list.
                             string upMH = nodeWorkVals[0];
-                            Debug.WriteLine($"********************\nUpstream Manhole: {upMH}\nSelected Manhole: {mhNum}");
+                            //Debug.WriteLine($"********************\nUpstream Manhole: {upMH}\nSelected Manhole: {mhNum}");
 
                             // Check if upstream manhole and selected manhole are the same.
                             if (upMH == mhNum)
                             {
                                 // Add to removeArcList
                                 removeArcsList.Add(workArc);
-                                Debug.WriteLine($"********************\nUpstream manhole == Selected Manhole\nArc Added to removeArcList: {workArc}\n" + 
-                                    "This means the Arc is downstream of selected manhole and should be added to the remove list.");
+                                //Debug.WriteLine($"********************\nUpstream manhole == Selected Manhole\nArc Added to removeArcList: {workArc}\n" + 
+                                //    "This means the Arc is downstream of selected manhole and should be added to the remove list.");
                             }
 
                             else
                             {
-                                Debug.WriteLine($"********************\nUpstream manhole({upMH}) <> Selected Manhole({mhNum})");
+                                //Debug.WriteLine($"********************\nUpstream manhole({upMH}) <> Selected Manhole({mhNum})");
                             }
 
 
                         }
 
+                        // Loop through removeArcsList remove each removeArc in list from workArcList (this is getting confusing) 
                         foreach (var removeArc in removeArcsList)
                         {
-                            Debug.WriteLine($"********************\nremoveArc: {removeArc}");
+                            //Debug.WriteLine($"********************\nremoveArc: {removeArc}");
+
+                            // Remove from workArcList
                             workArcList.Remove(removeArc);
                         }
 
@@ -196,7 +209,139 @@ namespace Trace
                             MessageBox.Show("No upstream sewer lines found.", "Warning");
                         }
 
-                                                  
+                        // Create dictionary to store upstream arcs that will be used to create query string.
+                        // Only reason dictionary is used is because it's a quick way to prevent duplicate KEYS.
+                        Dictionary<string, string> upStreamArcDict = new Dictionary<string, string>();
+
+                        string upStreamNode = "";
+                        List<string> workManholeList = new List<string>();
+
+                        int loopCount = 0;
+
+                        // At start of loop, workArcList has >0 arcs from initial selection.
+                        do
+                        {
+                            loopCount++;
+                            //Debug.WriteLine($"********************\nLoop count: {loopCount}");
+
+                            workManholeList.Clear();
+                            removeArcsList.Clear();
+
+                            foreach (var arc in workArcList)
+                            {
+                                if (upStreamArcDict.ContainsKey(arc.ToString()))
+                                {
+                                    //Debug.WriteLine($"********************\nERROR: Key already exists in upStreamArcDict dictionary: {arc}" );
+                                }
+
+                                else
+                                {
+                                    // Add arc to upstream arc dictionary
+                                    upStreamArcDict.Add(arc.ToString(), "TRUE");
+                                    //Debug.WriteLine($"********************\nArc added to upStreamArcDict dictionary: {arc}");
+                                }
+                            }
+
+                            foreach (var upArc in workArcList)
+                            {
+                                arcNodeListDict.TryGetValue(upArc, out List<string> nodeWorkVals);
+
+                                //Get the upstream manhole [0] from list.
+                                string upMH = nodeWorkVals[0];
+
+                                // Add upstream manhole for selected upstream arc to workManholeList.
+                                // This will be used to get more more upstream arcs later.
+                                workManholeList.Add(upMH);
+                                //Debug.WriteLine($"********************\nUpstream Manhole added to workManholeList list: {upMH}");
+                            }
+
+                            // Clear workArcList to add new arcs later.
+                            workArcList.Clear();
+                            //Debug.WriteLine($"********************\nworkArcList list cleared");
+
+                            // Get all the arcs connected to all the manholes in the workManholeList using nodeArcListDict dictionary.
+                            // Add these arcs to workArcList.
+                            foreach (var mh in workManholeList)
+                            {
+                                // Get all the arcs attached to manhole/node.
+                                //Debug.WriteLine($"********************\nManhole number (workManholeList): {mh}");
+                                nodeArcListDict.TryGetValue(mh, out List<int> arcVals);
+                                // Add list of arcs to workArcList list.
+                                workArcList.AddRange(arcVals);
+                                //Debug.WriteLine($"********************\nNumber of arcs attached to {mh}: {arcVals.Count}");
+                            }
+
+                            // Loop through all the arcs in workArcList and for arcs that have upstream manholes in the workManholeList,
+                            // add that arc to removeArcsList.
+                            foreach (var arc2 in workArcList)
+                            {
+                                // get list of nodes for arcs in workArcList.
+                                arcNodeListDict.TryGetValue(arc2, out List<string> nodeWorkVals2);
+
+                                // Get the upstream manhole [0] from list.
+                                string upMH = nodeWorkVals2[0];
+
+                                // Check workManholeList for upMH and remove from removeArcList if TRUE.
+                                if (workManholeList.Contains(upMH))
+                                {
+                                   removeArcsList.Add(arc2);
+                                }
+                            }
+
+                            // Remove arcs in removeArcsList from workArcsList
+                            foreach (var arc3 in removeArcsList)
+                            {
+                                workArcList.Remove(arc3);
+                                //Debug.WriteLine($"********************\n{arc3} removed from workArcList");
+
+                            }
+
+                            //Debug.WriteLine($"********************\nNumber of arcs in workArcList: {workArcList.Count}");
+
+
+                            // Loop through again if condition is met.
+                        } while (workArcList.Count > 0);
+
+                        //Debug.WriteLine($"********************\nCount: {upStreamArcDict.Keys.Count}");
+
+
+                        // Build the query string from the upStreamArcDict KEYS to select the upstream sewer lines.
+                        int count = 0;
+                        //Debug.WriteLine($"********************\nLoop count: {count}");
+                        string queryString = "";
+                        //Debug.WriteLine($"********************\nQuery String: {queryString}");
+                        foreach (var key in upStreamArcDict.Keys)
+                        {
+                            //Debug.WriteLine($"********************\nLoop count: {count}");
+                            if (count == 0)
+                            {
+                                queryString = queryString + $"OBJECTID IN ({key}";
+                                //Debug.WriteLine($"********************\nKey: {key} \nQuery String: {queryString}");
+                            }
+                            else if (count < upStreamArcDict.Keys.Count)
+                            {
+                                queryString = queryString + $",{key}";
+                                //Debug.WriteLine($"********************\nKey: {key} \nQuery String: {queryString}");
+                            }
+                            //else 
+                            //{
+                            //    queryString = queryString + $")";
+                            //    Debug.WriteLine($"********************\nQuery String: {queryString}");
+                            //}
+                            count++;
+
+
+                        }
+                        queryString = queryString + $")";
+                        //Debug.WriteLine($"********************\nCompleted query string: {queryString}");
+
+                        QueryFilter queryFilter = new QueryFilter { WhereClause = queryString };
+                        var featLayers = map.GetLayersAsFlattenedList().OfType<FeatureLayer>().FirstOrDefault(s => s.Name == "Sewer Lines");
+
+
+                        featLayers.Select(queryFilter, SelectionCombinationMethod.New);
+
+
 
                     }
 
@@ -204,7 +349,7 @@ namespace Trace
 
                 catch (Exception)
                 {
-                    string caption = "Failed to select manhole!";
+                    string caption = "Upstream trace failed!";
                     string message = "Process failed. \n\nSave and restart ArcGIS Pro and try process again.\n\n" +
                         "If problem persist, contact your local GIS nerd.";
 
