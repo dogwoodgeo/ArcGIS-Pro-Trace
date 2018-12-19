@@ -42,6 +42,8 @@ namespace Trace
         Dictionary<string, List<int>> nodeArcListDict = new Dictionary<string, List<int>>();
         //private readonly object value;
 
+        ProgressDialog progDial = new ProgressDialog("I'm doing my thing.\nPlease be patient, Human.", false);
+
         public TraceUpstream()
         {
             IsSketchTool = true;
@@ -123,6 +125,7 @@ namespace Trace
  
                     // get the currently selected features in the map
                     var selectedFeatures = map.GetSelection();
+                    Debug.WriteLine($"*****************************\nSelection Count: {selectedFeatures.Count}");
 
                     if (selectedFeatures.Count == 0)
                     {
@@ -134,6 +137,9 @@ namespace Trace
                     }
                     else
                     {
+                        progDial.Show();
+
+
                         // get the first layer and its corresponding selected feature OIDs
                         var firstSelectionSet = selectedFeatures.First();
 
@@ -145,7 +151,6 @@ namespace Trace
 
                         //get the value of
                         string mhNum = inspector["MH_NO"].ToString();
-                        //MessageBox.Show(mhNum, "Selected Manhole");
 
                         // Create the workArcList to store the Arcs(VALUES as int) from the nodeArcListDict 
                         // for the selected mhNum(KEY as string)
@@ -158,39 +163,31 @@ namespace Trace
                         foreach (var arcValue in arcValues)
                         {
                             workArcList.Add(arcValue);
-                            //Debug.WriteLine("********************\n"+ arcValue);
                         }
-                        //Debug.WriteLine("*************************\n" + workArcList.Count);
 
                         // Create the removeArcsList to store the Arcs(VALUES as int)  
-                        // 
                         List<int> removeArcsList = new List<int>();
 
                         // loop through workArcList check if it contains upstream node = mhNum selected by user
                         foreach (var workArc in workArcList)
                         {
-                            //Debug.WriteLine($"********************\nAttached arc: {workArc}" );
-
                             // Get the list of Values from the arcNodeListDict for the current arc KEY (workArc) in workArcList.
                             arcNodeListDict.TryGetValue(workArc, out List<string> nodeWorkVals);
                             
                             //Get the upstream manhole [0] from list.
                             string upMH = nodeWorkVals[0];
-                            //Debug.WriteLine($"********************\nUpstream Manhole: {upMH}\nSelected Manhole: {mhNum}");
 
                             // Check if upstream manhole and selected manhole are the same.
                             if (upMH == mhNum)
                             {
                                 // Add to removeArcList
                                 removeArcsList.Add(workArc);
-                                //Debug.WriteLine($"********************\nUpstream manhole == Selected Manhole\nArc Added to removeArcList: {workArc}\n" + 
-                                //    "This means the Arc is downstream of selected manhole and should be added to the remove list.");
                             }
 
-                            else
-                            {
-                                //Debug.WriteLine($"********************\nUpstream manhole({upMH}) <> Selected Manhole({mhNum})");
-                            }
+                            //else
+                            //{
+                            //    //Debug.WriteLine($"********************\nUpstream manhole({upMH}) <> Selected Manhole({mhNum})");
+                            //}
 
 
                         }
@@ -198,8 +195,6 @@ namespace Trace
                         // Loop through removeArcsList remove each removeArc in list from workArcList (this is getting confusing) 
                         foreach (var removeArc in removeArcsList)
                         {
-                            //Debug.WriteLine($"********************\nremoveArc: {removeArc}");
-
                             // Remove from workArcList
                             workArcList.Remove(removeArc);
                         }
@@ -213,7 +208,7 @@ namespace Trace
                         // Only reason dictionary is used is because it's a quick way to prevent duplicate KEYS.
                         Dictionary<string, string> upStreamArcDict = new Dictionary<string, string>();
 
-                        string upStreamNode = "";
+                        //string upStreamNode = "";
                         List<string> workManholeList = new List<string>();
 
                         int loopCount = 0;
@@ -222,24 +217,23 @@ namespace Trace
                         do
                         {
                             loopCount++;
-                            //Debug.WriteLine($"********************\nLoop count: {loopCount}");
 
                             workManholeList.Clear();
                             removeArcsList.Clear();
 
                             foreach (var arc in workArcList)
                             {
-                                if (upStreamArcDict.ContainsKey(arc.ToString()))
-                                {
-                                    //Debug.WriteLine($"********************\nERROR: Key already exists in upStreamArcDict dictionary: {arc}" );
-                                }
-
-                                else
+                                if (upStreamArcDict.ContainsKey(arc.ToString()) == false)
                                 {
                                     // Add arc to upstream arc dictionary
                                     upStreamArcDict.Add(arc.ToString(), "TRUE");
-                                    //Debug.WriteLine($"********************\nArc added to upStreamArcDict dictionary: {arc}");
+                                    
                                 }
+
+                                //else
+                                //{
+
+                                //}
                             }
 
                             foreach (var upArc in workArcList)
@@ -252,23 +246,19 @@ namespace Trace
                                 // Add upstream manhole for selected upstream arc to workManholeList.
                                 // This will be used to get more more upstream arcs later.
                                 workManholeList.Add(upMH);
-                                //Debug.WriteLine($"********************\nUpstream Manhole added to workManholeList list: {upMH}");
                             }
 
                             // Clear workArcList to add new arcs later.
                             workArcList.Clear();
-                            //Debug.WriteLine($"********************\nworkArcList list cleared");
 
                             // Get all the arcs connected to all the manholes in the workManholeList using nodeArcListDict dictionary.
                             // Add these arcs to workArcList.
                             foreach (var mh in workManholeList)
                             {
                                 // Get all the arcs attached to manhole/node.
-                                //Debug.WriteLine($"********************\nManhole number (workManholeList): {mh}");
                                 nodeArcListDict.TryGetValue(mh, out List<int> arcVals);
                                 // Add list of arcs to workArcList list.
                                 workArcList.AddRange(arcVals);
-                                //Debug.WriteLine($"********************\nNumber of arcs attached to {mh}: {arcVals.Count}");
                             }
 
                             // Loop through all the arcs in workArcList and for arcs that have upstream manholes in the workManholeList,
@@ -292,54 +282,41 @@ namespace Trace
                             foreach (var arc3 in removeArcsList)
                             {
                                 workArcList.Remove(arc3);
-                                //Debug.WriteLine($"********************\n{arc3} removed from workArcList");
-
                             }
 
-                            //Debug.WriteLine($"********************\nNumber of arcs in workArcList: {workArcList.Count}");
 
 
                             // Loop through again if condition is met.
                         } while (workArcList.Count > 0);
 
-                        //Debug.WriteLine($"********************\nCount: {upStreamArcDict.Keys.Count}");
 
 
                         // Build the query string from the upStreamArcDict KEYS to select the upstream sewer lines.
                         int count = 0;
-                        //Debug.WriteLine($"********************\nLoop count: {count}");
                         string queryString = "";
-                        //Debug.WriteLine($"********************\nQuery String: {queryString}");
                         foreach (var key in upStreamArcDict.Keys)
                         {
-                            //Debug.WriteLine($"********************\nLoop count: {count}");
                             if (count == 0)
                             {
                                 queryString = queryString + $"OBJECTID IN ({key}";
-                                //Debug.WriteLine($"********************\nKey: {key} \nQuery String: {queryString}");
                             }
                             else if (count < upStreamArcDict.Keys.Count)
                             {
                                 queryString = queryString + $",{key}";
-                                //Debug.WriteLine($"********************\nKey: {key} \nQuery String: {queryString}");
                             }
-                            //else 
-                            //{
-                            //    queryString = queryString + $")";
-                            //    Debug.WriteLine($"********************\nQuery String: {queryString}");
-                            //}
+
                             count++;
 
 
                         }
                         queryString = queryString + $")";
-                        //Debug.WriteLine($"********************\nCompleted query string: {queryString}");
 
                         QueryFilter queryFilter = new QueryFilter { WhereClause = queryString };
                         var featLayers = map.GetLayersAsFlattenedList().OfType<FeatureLayer>().FirstOrDefault(s => s.Name == "Sewer Lines");
 
 
                         featLayers.Select(queryFilter, SelectionCombinationMethod.New);
+                        progDial.Hide();
 
 
 
@@ -353,10 +330,13 @@ namespace Trace
                     string message = "Process failed. \n\nSave and restart ArcGIS Pro and try process again.\n\n" +
                         "If problem persist, contact your local GIS nerd.";
 
+                    progDial.Hide();
+
                     //Using the ArcGIS Pro SDK MessageBox class
                     MessageBox.Show(message, caption);
                 }
                 return true;
+                
             });
         }
     }
