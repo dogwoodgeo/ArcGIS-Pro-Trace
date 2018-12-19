@@ -9,6 +9,7 @@ using ArcGIS.Core.Data;
 using ArcGIS.Core.Geometry;
 using ArcGIS.Desktop.Catalog;
 using ArcGIS.Desktop.Core;
+using ArcGIS.Desktop.Core.Geoprocessing;
 using ArcGIS.Desktop.Editing;
 using ArcGIS.Desktop.Editing.Attributes;
 using ArcGIS.Desktop.Extensions;
@@ -306,11 +307,22 @@ namespace Trace
                         queryString = queryString + $")";
 
                         QueryFilter queryFilter = new QueryFilter { WhereClause = queryString };
-                        var featLayers = map.GetLayersAsFlattenedList().OfType<FeatureLayer>().FirstOrDefault(s => s.Name == "Sewer Lines");
+                        var sewerLines = map.GetLayersAsFlattenedList().OfType<FeatureLayer>().FirstOrDefault(s => s.Name == "Sewer Lines");
+                        var manholes = map.GetLayersAsFlattenedList().OfType<FeatureLayer>().FirstOrDefault(s => s.Name == "Manholes");
+
+                        sewerLines.Select(queryFilter, SelectionCombinationMethod.New);
 
 
-                        featLayers.Select(queryFilter, SelectionCombinationMethod.New);
+                        //string spatialRelate = "INTERSECT";
+                        //int distance = 0;
+                        //string selectType = "NEW_SELECTION";
+                        //string invertRelate = "NOT_INVERT";
+
+                        //var parameters = Geoprocessing.MakeValueArray(manholes, spatialRelate, sewerLines, distance, selectType, invertRelate);
+
+                        //Geoprocessing.ExecuteToolAsync("management.SelectLayerByLocation", parameters);
                         progDial.Hide();
+
 
 
 
