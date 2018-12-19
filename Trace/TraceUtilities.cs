@@ -125,13 +125,6 @@ namespace Trace
             });
         }
 
-        //public async Task Progressor_NonCancelable()
-        //{
-        //    ArcGIS.Desktop.Framework.Threading.Tasks.ProgressorSource ps = new ArcGIS.Desktop.Framework.Threading.Tasks.ProgressorSource("Doing my thing...", false);
 
-        //    int numSecondsDelay = 5;
-        //    //If you run this in the DEBUGGER you will NOT see the dialog
-        //    await ArcGIS.Desktop.Framework.Threading.Tasks.QueuedTask.Run(() => Task.Delay(numSecondsDelay * 1000).Wait(), ps.Progressor);
-        //}
     }
 }

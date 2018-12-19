@@ -22,13 +22,6 @@ namespace Trace
 {
     internal class TraceUpstream : MapTool
     {
-        // TDODO
-        // 1) Add progress dialog for long traces.
-        // 2) Handle condtions when more than 1 manhole is selected.
-        //
-
-
-
 
         // GLOBAL VARIABLES FOR DICTIONARIES
         // *********************************
@@ -40,7 +33,6 @@ namespace Trace
         // nodeArcListDict: Lists all arcs attached to the specified node.
         // manhole# --> {sewerlineObjID, sewerlineObjID, ...} -- can have more than 2 arcs.
         Dictionary<string, List<int>> nodeArcListDict = new Dictionary<string, List<int>>();
-        //private readonly object value;
 
         ProgressDialog progDial = new ProgressDialog("I'm doing my thing.\nPlease be patient, Human.", false);
 
@@ -120,18 +112,20 @@ namespace Trace
                 {
                     ActiveMapView.SelectFeatures(geometry, SelectionCombinationMethod.New);
 
-
+                    
                     var map = MapView.Active.Map;
- 
+                    var mhLayer = map.GetLayersAsFlattenedList().OfType<FeatureLayer>().FirstOrDefault((m => m.Name == "Manholes"));
+
                     // get the currently selected features in the map
                     var selectedFeatures = map.GetSelection();
-                    Debug.WriteLine($"*****************************\nSelection Count: {selectedFeatures.Count}");
+                    var selectCount = mhLayer.SelectionCount;
+                    Debug.WriteLine($"*****************************\nSelection Count: {selectCount}");
 
-                    if (selectedFeatures.Count == 0)
+                    if (selectCount == 0)
                     {
                         MessageBox.Show("No manhole was selected.\n\nTry selecting a manhole again.", "Warning");
                     }
-                    else if (selectedFeatures.Count > 1)
+                    else if (selectCount > 1)
                     {
                         MessageBox.Show("More than one manhole selected.\n\nTry selecting manholes again.", "Warning");
                     }
