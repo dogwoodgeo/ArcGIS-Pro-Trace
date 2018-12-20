@@ -24,17 +24,44 @@
         <group id="Trace_TraceUtilities" caption="Trace" appearsOnAddInTab="true">
           <!-- host controls within groups -->
           <tool refID="Trace_TraceUpstream" size="large" />
+          <tool refID="Trace_TraceDownstream" size="large" />
           <button refID="Trace_AddManholesTrace" size="large" />
         </group>
       </groups>
       <controls>
         <!-- add your controls here -->
-        <tool id="Trace_TraceUpstream" caption="Trace Upstream" className="TraceUpstream" loadOnClick="true" smallImage="Images\GenericButtonRed16.png" largeImage="Images\GenericButtonRed32.png" condition="esri_mapping_mapPane">
-          <tooltip heading="Tooltip Heading">Tooltip text<disabledText /></tooltip>
+        <tool id="Trace_TraceUpstream" 
+              caption="Trace                
+              Up" 
+              className="TraceUpstream" 
+              loadOnClick="true" 
+              smallImage="Images\GenericButtonRed16.png" 
+              largeImage="Images\GenericButtonRed32.png" 
+              condition="esri_mapping_mapPane">
+          <tooltip heading="Trace Upstream">
+            Used to trace sewers upstream from a single selected manhole.<disabledText /></tooltip>
         </tool>
-        <button id="Trace_AddManholesTrace" caption="Add Manhole Selection" className="AddManholesTrace" loadOnClick="true" smallImage="Images\GenericButtonBlue16.png" largeImage="Images\GenericButtonBlue32.png">
-          <tooltip heading="Add Manholes To Trace"> Select manholes associated with trace that has been performed.<disabledText /></tooltip>
+        <button id="Trace_AddManholesTrace" 
+                caption="Add
+                Manholes" 
+                className="AddManholesTrace"
+                loadOnClick="true" 
+                smallImage="Images\GenericButtonBlue16.png" 
+                largeImage="Images\GenericButtonBlue32.png">
+          <tooltip heading="Add Manholes To Trace"> 
+            Selects manholes associated with trace that has been performed.<disabledText /></tooltip>
         </button>
+        <tool id="Trace_TraceDownstream" 
+              caption="Trace 
+              Down" 
+              className="TraceDownstream" 
+              loadOnClick="true" 
+              smallImage="Images\GenericButtonRed16.png" 
+              largeImage="Images\GenericButtonRed32.png" 
+              condition="esri_mapping_mapPane">
+          <tooltip heading="Trace Downstream">
+            Used to trace sewers downstream from a single selected manhole.<disabledText /></tooltip>
+        </tool>
       </controls>
     </insertModule>
   </modules>

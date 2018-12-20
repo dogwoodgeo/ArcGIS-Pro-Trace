@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,7 +8,6 @@ using ArcGIS.Core.Data;
 using ArcGIS.Core.Geometry;
 using ArcGIS.Desktop.Catalog;
 using ArcGIS.Desktop.Core;
-using ArcGIS.Desktop.Core.Geoprocessing;
 using ArcGIS.Desktop.Editing;
 using ArcGIS.Desktop.Editing.Attributes;
 using ArcGIS.Desktop.Extensions;
@@ -21,9 +19,8 @@ using ArcGIS.Desktop.Mapping;
 
 namespace Trace
 {
-    internal class TraceUpstream : MapTool
+    internal class TraceDownstream : MapTool
     {
-
         // GLOBAL VARIABLES FOR DICTIONARIES
         // *********************************
         // arcNodeListDict: paired list of From (upstream) node and To (downstream) node for each arc.
@@ -37,15 +34,15 @@ namespace Trace
 
         ProgressDialog progDial = new ProgressDialog("I'm doing my thing.\nPlease be patient, Human.", false);
 
-        public TraceUpstream()
+        public TraceDownstream()
         {
             IsSketchTool = true;
             SketchType = SketchGeometryType.Rectangle;
             SketchOutputMode = SketchOutputMode.Screen;
         }
+
         protected override Task OnToolActivateAsync(bool active)
         {
-
             return QueuedTask.Run(() =>
             {
                 try
@@ -59,12 +56,12 @@ namespace Trace
                     // Check for the SEWER LINES Layer and MANHOLES layers in the map.
                     if (mhExists == false && sewerExists == false)
                     {
-                        MessageBox.Show("Manholes & Sewers are missing from map.\n'Manholes' and 'Sewer Lines' layers must be named exactly as such for trace to work", 
+                        MessageBox.Show("Manholes & Sewer Lines are missing from map.\n'Manholes' and 'Sewer Lines' layers must be named exactly as such for trace to work", 
                             "WARNING!");
                     }
                     else if (mhExists == false && sewerExists)
                     {
-                        MessageBox.Show("Sewer Lines layer is present. \n\nManholes layer is missing from map.\n'Manholes' layer must be named exactly as such for trace to work",
+                        MessageBox.Show("Sewer Lines layer is present. \n\nManholes layer is missing from map.\n'Manholes' layer must be named exactly as such for trace to work", 
                             "WARNING!");
                     }
                     else if (mhExists && sewerExists == false)
@@ -106,6 +103,7 @@ namespace Trace
                     MessageBox.Show(message, caption);
                 }
             });
+
         }
 
         protected override Task<bool> OnSketchCompleteAsync(Geometry geometry)
@@ -116,14 +114,13 @@ namespace Trace
                 {
                     ActiveMapView.SelectFeatures(geometry, SelectionCombinationMethod.New);
 
-                    
+
                     var map = MapView.Active.Map;
                     var mhLayer = map.GetLayersAsFlattenedList().OfType<FeatureLayer>().FirstOrDefault((m => m.Name == "Manholes"));
 
                     // Get the currently selected features in the map
                     var selectedFeatures = map.GetSelection();
                     var selectCount = mhLayer.SelectionCount;
-                    Debug.WriteLine($"*****************************\nSelection Count: {selectCount}");
 
                     if (selectCount == 0)
                     {
@@ -166,17 +163,17 @@ namespace Trace
                         // Create the removeArcsList to store the Arcs(VALUES as int)  
                         List<int> removeArcsList = new List<int>();
 
-                        // loop through workArcList check if it contains upstream node = mhNum selected by user
+                        // loop through workArcList check if it contains downstream node = mhNum selected by user
                         foreach (var workArc in workArcList)
                         {
                             // Get the list of Values from the arcNodeListDict for the current arc KEY (workArc) in workArcList.
                             arcNodeListDict.TryGetValue(workArc, out List<string> nodeWorkVals);
-                            
-                            //Get the upstream manhole [0] from list.
-                            string upMH = nodeWorkVals[0];
 
-                            // Check if upstream manhole and selected manhole are the same.
-                            if (upMH == mhNum)
+                            //Get the downstream manhole [0] from list.
+                            string downMH = nodeWorkVals[1];
+
+                            // Check if downstream manhole and selected manhole are the same.
+                            if (downMH == mhNum)
                             {
                                 // Add to removeArcList
                                 removeArcsList.Add(workArc);
@@ -193,14 +190,14 @@ namespace Trace
 
                         if (workArcList.Count() == 0)
                         {
-                            MessageBox.Show("No upstream sewer lines found.", "WARNING!");
+                            MessageBox.Show("No downstream sewer lines found.", "WARNING!");
                         }
 
-                        // Create dictionary to store upstream arcs that will be used to create query string.
+                        // Create dictionary to store downstream arcs that will be used to create query string.
                         // Only reason dictionary is used is because it's a quick way to prevent duplicate KEYS.
-                        Dictionary<string, string> upStreamArcDict = new Dictionary<string, string>();
+                        Dictionary<string, string> downStreamArcDict = new Dictionary<string, string>();
 
-                        //string upStreamNode = "";
+                        //string downStreamNode = "";
                         List<string> workManholeList = new List<string>();
 
                         int loopCount = 0;
@@ -215,25 +212,25 @@ namespace Trace
 
                             foreach (var arc in workArcList)
                             {
-                                if (upStreamArcDict.ContainsKey(arc.ToString()) == false)
+                                if (downStreamArcDict.ContainsKey(arc.ToString()) == false)
                                 {
-                                    // Add arc to upstream arc dictionary
-                                    upStreamArcDict.Add(arc.ToString(), "TRUE");
-                                    
+                                    // Add arc to downstream arc dictionary
+                                    downStreamArcDict.Add(arc.ToString(), "TRUE");
+
                                 }
 
                             }
 
-                            foreach (var upArc in workArcList)
+                            foreach (var dwnArc in workArcList)
                             {
-                                arcNodeListDict.TryGetValue(upArc, out List<string> nodeWorkVals);
+                                arcNodeListDict.TryGetValue(dwnArc, out List<string> nodeWorkVals);
 
-                                //Get the upstream manhole [0] from list.
-                                string upMH = nodeWorkVals[0];
+                                //Get the downstream manhole [1] from list.
+                                string downMH = nodeWorkVals[1];
 
-                                // Add upstream manhole for selected upstream arc to workManholeList.
-                                // This will be used to get more more upstream arcs later.
-                                workManholeList.Add(upMH);
+                                // Add downstream manhole for selected downstream arc to workManholeList.
+                                // This will be used to get more more downstream arcs later.
+                                workManholeList.Add(downMH);
                             }
 
                             // Clear workArcList to add new arcs later.
@@ -249,20 +246,20 @@ namespace Trace
                                 workArcList.AddRange(arcVals);
                             }
 
-                            // Loop through all the arcs in workArcList and for arcs that have upstream manholes in the workManholeList,
+                            // Loop through all the arcs in workArcList and for arcs that have downstream manholes in the workManholeList,
                             // add that arc to removeArcsList.
                             foreach (var arc2 in workArcList)
                             {
                                 // get list of nodes for arcs in workArcList.
                                 arcNodeListDict.TryGetValue(arc2, out List<string> nodeWorkVals2);
 
-                                // Get the upstream manhole [0] from list.
-                                string upMH = nodeWorkVals2[0];
+                                // Get the downstream manhole [0] from list.
+                                string downMH = nodeWorkVals2[1];
 
-                                // Check workManholeList for upMH and remove from removeArcList if TRUE.
-                                if (workManholeList.Contains(upMH))
+                                // Check workManholeList for downMH and remove from removeArcList if TRUE.
+                                if (workManholeList.Contains(downMH))
                                 {
-                                   removeArcsList.Add(arc2);
+                                    removeArcsList.Add(arc2);
                                 }
                             }
 
@@ -279,18 +276,18 @@ namespace Trace
 
 
 
-                        // Build the query string from the upStreamArcDict KEYS to select the upstream sewer lines.
+                        // Build the query string from the downStreamArcDict KEYS to select the downstream sewer lines.
                         int count = 0;
 
                         var stringBuilder = new StringBuilder();
 
-                        foreach (var key in upStreamArcDict.Keys)
+                        foreach (var key in downStreamArcDict.Keys)
                         {
                             if (count == 0)
                             {
                                 stringBuilder.Append($"OBJECTID IN ({key}");
                             }
-                            else if (count < upStreamArcDict.Keys.Count)
+                            else if (count < downStreamArcDict.Keys.Count)
                             {
                                 stringBuilder.Append($",{key}");
                             }
@@ -298,9 +295,6 @@ namespace Trace
                             count++;
                         }
                         stringBuilder.Append($")");
-                        //queryString = queryString + $")";
-
-                        Debug.WriteLine(stringBuilder);
 
                         // Select sewers using StringBuilder object above for the WhereClause.
                         QueryFilter queryFilter = new QueryFilter { WhereClause = stringBuilder.ToString() };
@@ -318,7 +312,7 @@ namespace Trace
                 catch (Exception)
                 {
                     string caption = "WARNING!";
-                    string message = "Upstream trace failed! \n\nSave and restart ArcGIS Pro and try process again.\n\n" +
+                    string message = "Downstream trace failed! \n\nSave and restart ArcGIS Pro and try process again.\n\n" +
                         "If problem persist, contact your local GIS nerd.";
 
                     progDial.Hide();
@@ -327,8 +321,9 @@ namespace Trace
                     MessageBox.Show(message, caption);
                 }
                 return true;
-                
+
             });
+
         }
     }
 }
