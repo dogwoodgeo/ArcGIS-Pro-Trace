@@ -24,14 +24,14 @@ Clone or download the repository. Open Visual Studio 2015 or 2017, build solutio
 
 ```c#
 Language:		C#
-Contributor:	Bradley Jones, bjones@dogwoodgeo.com
-Organization:	Little Rock Water Reclamation Authority (LRWRA)
+Contributor:	 Bradley Jones, bjones@dogwoodgeo.com
+Organization:	 Little Rock Water Reclamation Authority (LRWRA)
 Org Site: 		https://git.lrwu.com/portal
 Date:			10/31/2018
 ArcGIS Pro:		2.2
-ArcGIS Pro SDK:	2.2
-Visual Studio: 	2017, 2015
-.NET Target:	4.6.1
+ArcGIS Pro SDK:	 2.2
+Visual Studio: 	 2017, 2015
+.NET Target:	 4.6.1
 ```
 
 ### How To Use Add-In
