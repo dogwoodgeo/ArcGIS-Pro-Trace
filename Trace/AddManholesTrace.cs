@@ -36,15 +36,15 @@ namespace Trace
                     var sewerExists = map.GetLayersAsFlattenedList().OfType<FeatureLayer>().Any(s => s.Name == "Sewer Lines");
                     
                     // Check for the SEWER LINES Layer and MANHOLES layers in the map.
-                    if (mhExists == false && sewerExists == false)
+                    if (!mhExists && !sewerExists)
                     {
                         MessageBox.Show("Manholes & Sewers are missing from map.", "WARNING");
                     }
-                    else if (mhExists == false && sewerExists)
+                    else if (!mhExists && sewerExists)
                     {
                         MessageBox.Show("Sewer Lines layer is present. \n\nManholes layer is missing from map.", "WARNING");
                     }
-                    else if (mhExists && sewerExists == false)
+                    else if (mhExists && !sewerExists)
                     {
                         MessageBox.Show("Manholes layer is present. \n\nSewers layer is missing from map.", "WARNING");
                     }

@@ -54,17 +54,17 @@ namespace Trace
                     var sewerExists = map.GetLayersAsFlattenedList().OfType<FeatureLayer>().Any(s => s.Name == "Sewer Lines");
 
                     // Check for the SEWER LINES Layer and MANHOLES layers in the map.
-                    if (mhExists == false && sewerExists == false)
+                    if (!mhExists && !sewerExists )
                     {
                         MessageBox.Show("Manholes & Sewer Lines are missing from map.\n'Manholes' and 'Sewer Lines' layers must be named exactly as such for trace to work", 
                             "WARNING!");
                     }
-                    else if (mhExists == false && sewerExists)
+                    else if (!mhExists && sewerExists)
                     {
                         MessageBox.Show("Sewer Lines layer is present. \n\nManholes layer is missing from map.\n'Manholes' layer must be named exactly as such for trace to work", 
                             "WARNING!");
                     }
-                    else if (mhExists && sewerExists == false)
+                    else if (mhExists && !sewerExists)
                     {
                         MessageBox.Show("Manholes layer is present. \n\nSewer Lines layer is missing from map.\n'Sewer Lines' layer must be named exactly as such for trace to work",
                             "WARNING!");
@@ -212,7 +212,7 @@ namespace Trace
 
                             foreach (var arc in workArcList)
                             {
-                                if (downStreamArcDict.ContainsKey(arc.ToString()) == false)
+                                if (!downStreamArcDict.ContainsKey(arc.ToString()))
                                 {
                                     // Add arc to downstream arc dictionary
                                     downStreamArcDict.Add(arc.ToString(), "TRUE");
