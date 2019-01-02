@@ -10,7 +10,7 @@ There is limited support for Geometric Networks (GN) in ArcGIS Pro.  You can vie
 
 These tools work without using GN.  Each arc is attributed with upstream and downstream node fields. Reference dictionaries are created when the tool is activated (each with >37000 keys).  These are used to get the required up/down node and associated arcs.  Then, through populating a series of working dictionaries and lists, a query string is built and used in a query filter to select the appropriate arcs. 
 
-Credit for coming up with this approach goes to my supervisor, Mark Drew. 
+Credit for coming up with this approach goes to my supervisor, *Mark Drew*. 
 
 This tool is also apart of the larger [LRWRA add-in](https://github.com/dogwoodgeo/ArcGIS-Pro-LRWRA) 
 
