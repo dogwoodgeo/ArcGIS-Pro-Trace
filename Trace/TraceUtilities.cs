@@ -54,6 +54,11 @@ namespace Trace
         {
             QueuedTask.Run(() =>
             {
+
+                // Used to free up process memory. Without this the trace tool will 'hang up' after going between trace up and trace down.
+                nodeArcListDictionary.Clear();
+                arcNodeListDictionary.Clear();
+
                 // Global vairables
                 var map = MapView.Active.Map;
                 var arcLayer = map.FindLayers("Sewer Lines").FirstOrDefault() as FeatureLayer;
@@ -124,7 +129,5 @@ namespace Trace
                 }
             });
         }
-
-
     }
 }

@@ -71,6 +71,7 @@ namespace Trace
                     }
                     else
                     {
+
                         // Build the Dictionaries now that it has been confirmed that the necessary layers are in map.
                         TraceUtilities.BuildDictionariesAsync(arcNodeListDict, nodeArcListDict);
 

@@ -14,6 +14,8 @@ Credit for coming up with this approach goes to my supervisor, *Mark Drew*.
 
 This tool is also apart of the larger [LRWRA add-in](https://github.com/dogwoodgeo/ArcGIS-Pro-LRWRA) 
 
+**Update**: Fixed a major bug.  Trace tool would hang-up going between upstream and downstream traces. It appeared to be a process memory issue since two reference dictionaries with ~38,000 elements are created when each trace tool is activated. I simply cleared the dictionaries in the beginning of the  *BuildDictionariesAsync*.
+
 **Note**: I am a novice .Net developer.  The add-in works, but feel free to let me know if you see any code that is "wrong" or just plain bad.  
 
 ## Getting Started
